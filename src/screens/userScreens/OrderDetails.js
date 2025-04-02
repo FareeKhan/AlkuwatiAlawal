@@ -1,0 +1,436 @@
+import { Alert, FlatList, I18nManager, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import ExportSvg from '../../constants/ExportSvg'
+import { color } from '../../constants/color'
+import { bags } from '../../constants/data'
+import { useDispatch, useSelector } from 'react-redux'
+import { userShippingAddress } from '../../services/UserServices'
+import HeaderLogo from '../../components/HeaderLogo'
+import { decrementCounter, deleteProduct, incrementCounter, selectTotalPrice } from '../../redux/reducer/ProductAddToCart'
+import { useTranslation } from 'react-i18next';
+import { useIsFocused } from '@react-navigation/native';
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import CustomText from '../../components/CustomText'
+const OrderDetails = ({ navigation, route }) => {
+    //const { totalPrice } = route?.params
+    const data = useSelector((state) => state.cartProducts?.cartProducts)
+    const userId = useSelector((state) => state.auth?.userId)
+    const [address, setAddress] = useState('')
+    const { t } = useTranslation();
+    const userAddress = useSelector((state) => state?.customerAddress?.storeAddress)
+    console.log('userAddress--', userAddress)
+    const calculateTotalPrice = (items) => {
+        return items.reduce((total, item) => {
+            return total + (item.counter * parseFloat(item.price));
+        }, 0).toFixed(2);
+    };
+    const { userAddressA } = route?.params || ''
+    const isFocused = useIsFocused();
+
+
+    const totalPrice = calculateTotalPrice(data);
+    const [value, setValue] = useState(totalPrice)
+    console.log('totalPrice', totalPrice)
+
+
+    // useEffect(() => {
+    //     // getShippingAddress()
+    //     setAddress(userAddress)
+    // }, [isFocused])
+
+    console.log('address', address)
+
+
+    useEffect(() => {
+        var mount = true;
+        const listener = navigation.addListener('focus', async () => {
+            try {
+                const response = await userShippingAddress(userId);
+                console.log('fareed', address)
+                if (response) {
+                    setAddress(response?.data?.[response?.data?.length - 1])
+                } else {
+                    alert('something went wrong')
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        });
+
+        // if (Object.keys(userAddress)?.length == 0) {
+        //     navigation.navigate('ShippingAddress')
+        // }
+
+
+        return () => {
+            listener;
+            mount = false;
+        };
+
+
+
+    }, []);
+
+
+    const AddressLine = ({ label, value }) => (
+        <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            height: 40,
+        }}>
+            <Text style={styles.label}>{label}</Text>
+            <Text style={styles.value}>: </Text>
+            <Text style={styles.value}>{value}</Text>
+
+        </View>
+    );
+
+
+    const getShippingAddress = async () => {
+
+        /*try {
+            const response = await userShippingAddress(userId)
+            if (response) {
+                setAddress(response?.data?.[response?.data?.length - 1])
+            } else {
+                alert('something went wrong')
+            }
+
+        } catch (error) {
+            console.log(error)
+        }*/
+
+    }
+
+    const handleOnPress = () => {
+        if (userId) {
+            navigation.navigate('PaymentOrder', {
+                totalPrice: value
+            })
+        } else if (userAddress !== undefined) {
+            navigation.navigate('VerifyCode', {
+                totalPrice: value,
+                phoneNo: userAddress?.phone
+            })
+        }
+        else {
+            alert(t('selectAddress'))
+        }
+    }
+
+
+    const renderItem = ({ item, index }) => {
+        console.log('----', item)
+        return (
+            <View style={styles.productContainer}>
+                <Image borderRadius={5} source={{ uri: item?.image }} style={{ width: 60, height: 60 }} />
+
+                <View style={{ marginLeft: 10, }}>
+                    <Text style={{ ...styles.productTitle, textAlign: I18nManager.isRTL ? 'left' : 'left' }}>{item?.productName}</Text>
+                    <Text style={{ ...styles.subTitle, textAlign: I18nManager.isRTL ? 'left' : 'left' }}>{item?.subText}</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }} >
+                        <Text style={{ ...styles.productPrice, textAlign: I18nManager.isRTL ? 'left' : 'left' }}>{item?.price}</Text>
+                        <CustomText style={{ color: color.theme, fontWeight: '500' }}>{item?.counter}x</CustomText>
+                    </View>
+                </View>
+
+
+
+            </View>
+        )
+    }
+
+
+    const onPressEmptyAddress = () => {
+        if (userId) {
+            navigation.navigate("ShippingAddress")
+        } else {
+            Alert.alert(
+                t(''),
+                t('addressSaved'),
+                [
+                    {
+                        text: t('ok'), onPress: () => navigation.navigate('StackNavigations', {
+                            screen: "Login",
+                            params: { isOrderDetail: true }
+                        }
+                        )
+                    }
+                ],
+                {
+                    textAlign: I18nManager.isRTL ? 'right' : 'left'  // Align title based on language direction
+                }
+            );
+        }
+
+    }
+
+    return (
+        <View style={styles.mainContainer}>
+            <View style={styles.headerContainer}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Ionicons size={40} name={I18nManager.isRTL ? 'chevron-forward-circle' : 'chevron-back-circle'} color={color.theme} />
+                </TouchableOpacity>
+                <HeaderLogo />
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: "space-between" }}>
+                <Text style={[styles.productName]}>{t("delivery_address")}</Text>
+                {
+                    userId &&
+                    <TouchableOpacity style={{ borderWidth: 1, alignSelf: "baseline", paddingHorizontal: 10, paddingVertical: 2, borderRadius: 5, borderColor: "#cecece" }} onPress={() => navigation.navigate('SavedAddresses')}>
+                        <CustomText style={{ fontSize: 16, fontWeight: "600", color: color.theme, textAlign: "left" }}>{t('changeAddress')}</CustomText>
+                    </TouchableOpacity>
+                }
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 70 }}>
+
+                {
+                    Object?.keys(userAddress)?.length == 0 || userAddress == undefined
+                        // userAddress == undefined
+                        ?
+                        // <TouchableOpacity onPress={() => navigation.navigate('ShippingAddress')} style={styles.addCardBox}>
+                        <TouchableOpacity onPress={() => onPressEmptyAddress()} style={styles.addCardBox}>
+                            <View style={styles.addCardPlusBox}>
+                                <Text style={styles.plusIcon}>+</Text>
+                            </View>
+                            <Text style={{ fontSize: 16, fontFamily: "Montserrat-Medium", color: color.theme }}>{t('add_delivery_address')}</Text>
+                        </TouchableOpacity>
+                        :
+                        <View>
+                            <View style={styles.userAddressBox}>
+                                <AddressLine label={t('Street')} value={userAddress?.street} />
+                                <AddressLine label={t('City')} value={userAddress?.city} />
+                                <AddressLine label={t('governorate')} value={userAddress?.area} />
+                                <AddressLine label={t('phoneNumber')} value={`\u2066${userAddress?.phone}\u2069`} />
+                                <AddressLine label={t('Country')} value={userAddress?.country} />
+                            </View>
+                            {/* <TouchableOpacity onPress={() => navigation.navigate(userId !== null ? 'SavedAddresses' : 'ShippingAddress')} style={styles.editBox}>
+                                <Text style={{ color: color.theme }}>{t("edit")}</Text>
+                            </TouchableOpacity> */}
+                        </View>
+                }
+                <View style={{ flexDirection: 'row' }}>
+
+                    <Text style={[styles.productName, { fontSize: 15 }]}>{data?.length > 1 ? t("product_items") : t("product_item")}</Text>
+                </View>
+                <View style={{ marginBottom: 10 }}>
+                    <FlatList
+                        // data={bags?.slice(2)}
+                        data={data}
+                        keyExtractor={(item, index) => index?.toString()}
+                        renderItem={renderItem}
+                    />
+                </View>
+
+                {/*<Text style={[styles.productName, { fontSize: 15 }]}>Promo Code</Text>
+
+                <View style={styles.productContainer}>
+                    <View style={styles.percentLogoBox}>
+                        <ExportSvg.PromoPercent />
+                    </View>
+                    <View style={{ marginLeft: 10 }}>
+                        <Text style={styles.productTitle}>Add Promo Code</Text>
+                        <Text style={styles.subTitle}>#rika2021</Text>
+                    </View>
+                    
+                </View>*/}
+
+
+                <View style={{ flex: 1, justifyContent: "flex-end", marginVertical: 30, }}>
+                    <View style={styles.bottomContent}>
+                        <View>
+                            <Text style={{ fontSize: 10, color: "#AAA" }}>{t("total_price")}</Text>
+                            <Text style={styles.bottomPrice}>KD{value}</Text>
+                        </View>
+
+                        {
+                            <TouchableOpacity
+                                disabled={(Object.keys(userAddress).length > 0) ? false : true}
+                                style={{ ...styles.bottomPlaceOrderBox, backgroundColor: (Object.keys(userAddress)?.length > 0) ? color.theme : 'grey' }} onPress={handleOnPress}>
+                                {/* // style={{ ...styles.bottomPlaceOrderBox, backgroundColor: userAddress !== undefined ? color.theme : 'grey' }} onPress={handleOnPress}> */}
+                                <Text style={styles.orderTxt}>{t("continue")}</Text>
+                            </TouchableOpacity>
+                        }
+                    </View>
+                </View>
+            </ScrollView>
+
+        </View>
+    )
+}
+
+export default OrderDetails
+
+const styles = StyleSheet.create({
+    mainContainer: {
+        flex: 1,
+        paddingTop: Platform.OS == 'ios' ? 40 : 20,
+        backgroundColor: "#fff",
+        paddingHorizontal: 15
+
+    },
+    headerContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 15,
+        marginTop: 15,
+        width: '70%',
+        justifyContent: 'space-between'
+    },
+    logoBox: {
+        marginLeft: "auto",
+        marginRight: "auto",
+        right: 10
+    },
+    productName: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: color.theme,
+        fontFamily: "Montserrat-Bold",
+
+    },
+    editBox: {
+        position: "absolute",
+        right: 15,
+        top: 30
+    },
+    userAddressBox: {
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        backgroundColor: "#fff",
+        // elevation: 5,
+        borderWidth: 1,
+        borderColor: "#00000020",
+
+        padding: 20,
+        borderRadius: 20,
+        marginVertical: 15
+    },
+    label: {
+        fontFamily: "Montserrat-SemiBold",
+        fontWeight: "600",
+        color: color.theme,
+        textAlign: 'left',
+        marginRight: 2
+    },
+    value: {
+        color: color.grayShade,
+        fontWeight: "400",
+        fontFamily: "Montserrat-Regular",
+        textAlign: 'left',
+
+
+
+    },
+    productContainer: {
+        flexDirection: "row",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.30,
+        shadowRadius: 4,
+        backgroundColor: "#fff",
+        // elevation: 2,
+        marginHorizontal: 6,
+        marginTop: 8,
+        marginBottom: 10,
+        padding: 10,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#00000020',
+        // justifyContent: "space-between",
+        // alignItems: "center"
+    },
+    productTitle: {
+        color: color.theme,
+        fontFamily: "Montserrat-SemiBold"
+    },
+    subTitle: {
+        fontWeight: '400',
+        color: color.gray,
+        fontFamily: "Montserrat-Regular",
+        fontSize: 12,
+        marginVertical: Platform.OS == 'ios' ? 2 : 1
+
+    },
+    productPrice: {
+        fontWeight: "600",
+        color: color.theme,
+        fontFamily: "Montserrat-SemiBold"
+
+
+    },
+    counterMainContainer: {
+        flex: 1,
+        justifyContent: "flex-end"
+    },
+
+
+    percentLogoBox: {
+        width: 40,
+        height: 40,
+        backgroundColor: color.theme,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 7
+    },
+    bottomContent: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center"
+    },
+    bottomPlaceOrderBox: {
+        paddingHorizontal: 25,
+        paddingVertical: 12,
+        backgroundColor: color.theme,
+        borderRadius: 50
+    },
+    bottomPrice: {
+        fontSize: 18,
+        fontWeight: "600",
+        fontFamily: "Montserrat-Bold",
+        color: color.theme
+    },
+    orderTxt: {
+        fontSize: 16,
+        fontFamily: "Montserrat-SemiBold",
+        color: "#fff",
+        fontWeight: "600"
+    },
+    addCardBox: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        borderWidth: 1,
+        height: 60,
+        marginVertical: 25,
+        borderStyle: 'dashed',
+        borderColor: "#DDD",
+        borderRadius: 13,
+        zIndex: -1
+    },
+    addCardPlusBox: {
+        width: 35,
+        height: 35,
+        borderWidth: 1,
+        borderRadius: 50,
+        alignItems: "center",
+        justifyContent: "center",
+        borderColor: "#DDD",
+        marginRight: 15
+
+    },
+    plusIcon: {
+        color: color.theme,
+        fontSize: 18
+    },
+
+
+})
