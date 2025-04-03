@@ -74,7 +74,7 @@ const AllProducts = ({ navigation }) => {
         setIsLoader(true)
         try {
             const response = await categoriesList()
-            console.log('response', response)
+            console.log('shobanaaaa', response)
             if (response?.status) {
                 setIsLoader(false)
                 setStoreCat(response?.data)
@@ -108,14 +108,14 @@ const AllProducts = ({ navigation }) => {
 
     const renderItem = ({ item, index }) => {
         const isTextLeft = index % 2 === 0;
-        console.log('console',item)
+        console.log('console', item)
         return (
             <>
                 <Animatable.View
                     animation={isTextLeft ? animationRight : animationLeft}
                     duration={durationInner}
                     delay={(1 + index) * delayInner}
-                    
+
                 //iterationCount="infinite" direction="alternate"
                 >
                     <RNBounceable
@@ -123,7 +123,7 @@ const AllProducts = ({ navigation }) => {
                         underlayColor='#000'
                         bounceEffectIn={1.1}
                         bounceEffectOut={1}
-                        style={{ marginTop: 15, /*borderColor:'red',borderWidth:1,borderRadius: 10,*/}}
+                        style={{ marginTop: 15, /*borderColor:'red',borderWidth:1,borderRadius: 10,*/ }}
                     >
                         <View style={{
                             ...styles.bgContainer,
@@ -135,7 +135,7 @@ const AllProducts = ({ navigation }) => {
                             shadowOpacity: 0.25,
                             shadowRadius: 4,
                             elevation: 5,
-                            
+
                             borderColor: '#301A58',
                             borderRadius: 10, backgroundColor: innetCate == item?.id ? "#67300f" : '#dbdfe0', flex: 1, flexDirection: 'row'
                         }} >
@@ -148,7 +148,7 @@ const AllProducts = ({ navigation }) => {
                                     width: '35%',
                                     justifyContent: 'center', paddingHorizontal: 10
                                 }}>
-                                    <Text style={{...styles.titleTxt, color: innetCate == item?.id ? "white" : "#67300f"}}>{item?.name}</Text>
+                                    <Text style={{ ...styles.titleTxt, color: innetCate == item?.id ? "white" : "#67300f" }}>{item?.name}</Text>
                                     {/* <Text style={{...styles.subTxt,color: innetCate == item?.id ? "white" : "#67300f"}}>{item?.total_products} {t('count_product')}</Text> */}
                                 </View>
                             </View>
@@ -156,10 +156,10 @@ const AllProducts = ({ navigation }) => {
 
                     </RNBounceable>
                 </Animatable.View>
-               
+
                 {innetCate == item?.id &&
-                <View style={{}}>
-                    <CategorySubList innetCate={innetCate} navigation={navigation}/>
+                    <View style={{}}>
+                        <CategorySubList innetCate={innetCate} navigation={navigation} />
                     </View>
                 }
 
@@ -179,61 +179,61 @@ const AllProducts = ({ navigation }) => {
 
     return (
         <DrawerSceneWrapper>
-             <Animatable.View
-        animation={'slideInLeft'}
-        duration={1000}
-        delay={100}
-        style={{ flex: 1 }}
-      >
-        <View style={styles.mainContainer}>
-            <View style={styles.headerContainer}>
-                {/* <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
+            <Animatable.View
+                animation={'slideInLeft'}
+                duration={1000}
+                delay={100}
+                style={{ flex: 1 }}
+            >
+                <View style={styles.mainContainer}>
+                    <View style={styles.headerContainer}>
+                        {/* <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
                     <ExportSvg.MenuBar />
                 </TouchableOpacity> */}
-                   <TouchableOpacity onPress={() => navigation.goBack()}>
-                                           <Ionicons size={40} name={I18nManager.isRTL ? 'chevron-forward-circle': 'chevron-back-circle'} color={color.theme} />
-                                         </TouchableOpacity>
-                <HeaderLogo />
-                <TouchableOpacity onPress={() => navigation.navigate('MyCart')}>
-                    <ExportSvg.Cart />
-                </TouchableOpacity>
-            </View>
-            <View style={styles.searchContainer}>
-                <TouchableOpacity style={[styles.searchBox]} onPress={() => setModalVisible(true)}>
-                    <ExportSvg.Search style={{
-                        marginLeft: 18,
-                        marginRight: 10
-                    }} />
-                    <Text style={{ color: "#00000080" }}>{t("search_here")}</Text>
-                </TouchableOpacity>
-            </View>
+                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                            <Ionicons size={40} name={I18nManager.isRTL ? 'chevron-forward-circle' : 'chevron-back-circle'} color={color.theme} />
+                        </TouchableOpacity>
+                        <HeaderLogo />
+                        <TouchableOpacity onPress={() => navigation.navigate('MyCart')}>
+                            <ExportSvg.Cart />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.searchContainer}>
+                        <TouchableOpacity style={[styles.searchBox]} onPress={() => setModalVisible(true)}>
+                            <ExportSvg.Search style={{
+                                marginLeft: 18,
+                                marginRight: 10
+                            }} />
+                            <Text style={{ color: "#00000080" }}>{t("search_here")}</Text>
+                        </TouchableOpacity>
+                    </View>
 
-            <Animatable.View
-                ref={viewRef}
-                easing={'ease-in-out'}
-                style={{ marginTop: -10,paddingHorizontal:15 }}
-                duration={durationMain}>
-                <FlatList
-                    data={storeCat}
-                    key={(item, index) => index?.toString()}
-                    renderItem={renderItem}
-                    style={{ paddingHorizontal: I18nManager.isRTL?0:15, }}
-                    contentContainerStyle={{ paddingBottom: 300 }}
-                    showsVerticalScrollIndicator={false}
-                    ItemSeparatorComponent={FlatListItemSeparator}
-                />
+                    <Animatable.View
+                        ref={viewRef}
+                        easing={'ease-in-out'}
+                        style={{ marginTop: -10, paddingHorizontal: 15 }}
+                        duration={durationMain}>
+                        <FlatList
+                            data={storeCat}
+                            key={(item, index) => index?.toString()}
+                            renderItem={renderItem}
+                            style={{ paddingHorizontal: I18nManager.isRTL ? 0 : 15, }}
+                            contentContainerStyle={{ paddingBottom: 300 }}
+                            showsVerticalScrollIndicator={false}
+                            ItemSeparatorComponent={FlatListItemSeparator}
+                        />
+                    </Animatable.View>
+
+                    <View>
+                        <SearchModal
+                            setModalVisible={setModalVisible}
+                            modalVisible={modalVisible}
+                            navigation={navigation}
+                        />
+                    </View>
+
+                </View>
             </Animatable.View>
-
-            <View>
-                <SearchModal
-                    setModalVisible={setModalVisible}
-                    modalVisible={modalVisible}
-                    navigation={navigation}
-                />
-            </View>
-
-        </View>
-        </Animatable.View>
         </DrawerSceneWrapper>
     )
 }

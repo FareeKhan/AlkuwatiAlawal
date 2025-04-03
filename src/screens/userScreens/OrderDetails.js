@@ -1,75 +1,125 @@
-import { Alert, FlatList, I18nManager, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { ActivityIndicator, Alert, FlatList, I18nManager, Image, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
 import ExportSvg from '../../constants/ExportSvg'
 import { color } from '../../constants/color'
 import { bags } from '../../constants/data'
 import { useDispatch, useSelector } from 'react-redux'
-import { userShippingAddress } from '../../services/UserServices'
+import { postPromoCoder, promoCodes, userShippingAddress } from '../../services/UserServices'
 import HeaderLogo from '../../components/HeaderLogo'
-import { decrementCounter, deleteProduct, incrementCounter, selectTotalPrice } from '../../redux/reducer/ProductAddToCart'
+import { decrementCounter, deleteProduct, handlePromo, handleTotalPrice, incrementCounter, selectTotalPrice } from '../../redux/reducer/ProductAddToCart'
 import { useTranslation } from 'react-i18next';
-import { useIsFocused } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import CustomText from '../../components/CustomText'
+import CustomInput from '../../components/CustomInput'
+import CustomButton from '../../components/CustomButton'
+import LottieView from 'lottie-react-native'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import CircleLoader from '../../components/CircleLoader'
 const OrderDetails = ({ navigation, route }) => {
     //const { totalPrice } = route?.params
+    const dispatch = useDispatch()
     const data = useSelector((state) => state.cartProducts?.cartProducts)
     const userId = useSelector((state) => state.auth?.userId)
-    const [address, setAddress] = useState('')
-    const { t } = useTranslation();
     const userAddress = useSelector((state) => state?.customerAddress?.storeAddress)
+    const { isPromo } = useSelector((state) => state?.cartProducts)
+    const { totalPrice } = useSelector(state => state.cartProducts);
+
+    const [address, setAddress] = useState([])
+    const [promoCode, setPromoCode] = useState('')
+    const [promoLoader, setPromoLoader] = useState(false)
+    const [successPromo, setSuccessPromo] = useState(false)
+
+    const { t } = useTranslation();
+
     console.log('userAddress--', userAddress)
-    const calculateTotalPrice = (items) => {
-        return items.reduce((total, item) => {
-            return total + (item.counter * parseFloat(item.price));
-        }, 0).toFixed(2);
-    };
+    // const calculateTotalPrice = (items) => {
+    //     return items.reduce((total, item) => {
+    //         return total + (item.counter * parseFloat(item.price));
+    //     }, 0).toFixed(2);
+    // };
     const { userAddressA } = route?.params || ''
     const isFocused = useIsFocused();
 
 
-    const totalPrice = calculateTotalPrice(data);
-    const [value, setValue] = useState(totalPrice)
-    console.log('totalPrice', totalPrice)
+    // const totalPrice = calculateTotalPrice(data);
+    // const [totalPrice, setTotalPrice] = useState(calculateTotalPrice(data))
+    // const [value, setValue] = useState(totalPrice)
 
 
     // useEffect(() => {
-    //     // getShippingAddress()
-    //     setAddress(userAddress)
-    // }, [isFocused])
-
-    console.log('address', address)
+    //     getAllCodes()
+    //     getAllCodes()
+    // }, [])
 
 
-    useEffect(() => {
-        var mount = true;
-        const listener = navigation.addListener('focus', async () => {
-            try {
-                const response = await userShippingAddress(userId);
-                console.log('fareed', address)
-                if (response) {
-                    setAddress(response?.data?.[response?.data?.length - 1])
-                } else {
-                    alert('something went wrong')
-                }
-            } catch (error) {
-                console.log(error)
+    // const getAllCodes = async () => {
+    //     try {
+    //         const result = await promoCodes()
+
+    //     } catch (error) {
+    //         console.log('error', error)
+    //     }
+    // }
+
+
+    const applyCode = async () => {
+        if (!promoCode) {
+            Alert.alert('', t('PleasePromo'), [
+                { text: t('ok'), onPress: () => console.log('OK pressed') }
+            ]);
+            return;
+        }
+        setPromoLoader(true)
+        try {
+            const result = await postPromoCoder(promoCode)
+
+            if (!result?.error) {
+                const discountAmount = (totalPrice * result?.promo_code?.discount) / 100
+                const finalValue = totalPrice - discountAmount
+                dispatch(handleTotalPrice(finalValue?.toFixed(2)))
+                dispatch(handlePromo())
+
+            } else {
+                Alert.alert('', t('promoExpire'))
             }
-        });
-
-        // if (Object.keys(userAddress)?.length == 0) {
-        //     navigation.navigate('ShippingAddress')
-        // }
-
-
-        return () => {
-            listener;
-            mount = false;
-        };
+        } catch (error) {
+            console.log('error', error)
+        } finally {
+            setPromoLoader(false)
+        }
+    }
 
 
 
-    }, []);
+    // useEffect(() => {
+    //     addressArray()
+    // }, [])
+    useFocusEffect(
+        useCallback(() => {
+            addressArray()
+        }, [])
+    )
+
+
+
+
+    const addressArray = async () => {
+        try {
+            const response = await userShippingAddress(userId);
+            console.log('sajidToro', response)
+            if (response?.data?.length > 0) {
+                setAddress(response?.data)
+            } else {
+                setAddress([])
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+
 
 
     const AddressLine = ({ label, value }) => (
@@ -86,30 +136,15 @@ const OrderDetails = ({ navigation, route }) => {
     );
 
 
-    const getShippingAddress = async () => {
-
-        /*try {
-            const response = await userShippingAddress(userId)
-            if (response) {
-                setAddress(response?.data?.[response?.data?.length - 1])
-            } else {
-                alert('something went wrong')
-            }
-
-        } catch (error) {
-            console.log(error)
-        }*/
-
-    }
 
     const handleOnPress = () => {
         if (userId) {
             navigation.navigate('PaymentOrder', {
-                totalPrice: value
+                totalPrice: totalPrice
             })
         } else if (userAddress !== undefined) {
             navigation.navigate('VerifyCode', {
-                totalPrice: value,
+                totalPrice: totalPrice,
                 phoneNo: userAddress?.phone
             })
         }
@@ -133,9 +168,6 @@ const OrderDetails = ({ navigation, route }) => {
                         <CustomText style={{ color: color.theme, fontWeight: '500' }}>{item?.counter}x</CustomText>
                     </View>
                 </View>
-
-
-
             </View>
         )
     }
@@ -164,6 +196,7 @@ const OrderDetails = ({ navigation, route }) => {
         }
 
     }
+    console.log('shumaila', address?.length)
 
     return (
         <View style={styles.mainContainer}>
@@ -176,7 +209,7 @@ const OrderDetails = ({ navigation, route }) => {
             <View style={{ flexDirection: 'row', justifyContent: "space-between" }}>
                 <Text style={[styles.productName]}>{t("delivery_address")}</Text>
                 {
-                    userId &&
+                    address?.length !== 0 && userId &&
                     <TouchableOpacity style={{ borderWidth: 1, alignSelf: "baseline", paddingHorizontal: 10, paddingVertical: 2, borderRadius: 5, borderColor: "#cecece" }} onPress={() => navigation.navigate('SavedAddresses')}>
                         <CustomText style={{ fontSize: 16, fontWeight: "600", color: color.theme, textAlign: "left" }}>{t('changeAddress')}</CustomText>
                     </TouchableOpacity>
@@ -222,25 +255,45 @@ const OrderDetails = ({ navigation, route }) => {
                     />
                 </View>
 
-                {/*<Text style={[styles.productName, { fontSize: 15 }]}>Promo Code</Text>
+                <Text style={[styles.productName, { fontSize: 15 }]}>{t('promoCoder')}</Text>
 
-                <View style={styles.productContainer}>
-                    <View style={styles.percentLogoBox}>
-                        <ExportSvg.PromoPercent />
+                <View style={[styles.productContainer, { justifyContent: "space-between" }]}>
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+
+                        <TextInput
+                            placeholder={t('enderPromo')}
+                            placeholderTextColor={'#cecece'}
+                            style={{ color: "#000", textAlign: I18nManager.isRTL ? 'left' : 'left', height: 38 }}
+                            value={promoCode}
+                            onChangeText={setPromoCode}
+                            maxLength={8}
+                        />
+
                     </View>
-                    <View style={{ marginLeft: 10 }}>
-                        <Text style={styles.productTitle}>Add Promo Code</Text>
-                        <Text style={styles.subTitle}>#rika2021</Text>
-                    </View>
-                    
-                </View>*/}
+                    {
+                        promoLoader ?
+                            <View style={{ position: "absolute", right: -5, top: -5 }} >
+                                <CircleLoader />
+                            </View>
+                            :
+                            isPromo ?
+                                <View style={{ top: 10 }} >
+                                    <AntDesign name={'checkcircle'} size={18} color={'green'} />
+                                </View>
+                                :
+                                <TouchableOpacity onPress={() => applyCode()} style={{ justifyContent: "center", paddingHorizontal: 5 }}>
+                                    <CustomText style={{ color: color.theme, fontWeight: "500" }}>Apply</CustomText>
+                                </TouchableOpacity>
+
+                    }
+                </View>
 
 
                 <View style={{ flex: 1, justifyContent: "flex-end", marginVertical: 30, }}>
                     <View style={styles.bottomContent}>
                         <View>
                             <Text style={{ fontSize: 10, color: "#AAA" }}>{t("total_price")}</Text>
-                            <Text style={styles.bottomPrice}>KD{value}</Text>
+                            <Text style={styles.bottomPrice}>KD{totalPrice}</Text>
                         </View>
 
                         {
@@ -287,6 +340,7 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         color: color.theme,
         fontFamily: "Montserrat-Bold",
+        textAlign: "left"
 
     },
     editBox: {
@@ -341,10 +395,12 @@ const styles = StyleSheet.create({
         marginHorizontal: 6,
         marginTop: 8,
         marginBottom: 10,
-        padding: 10,
-        borderRadius: 10,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 7,
         borderWidth: 1,
         borderColor: '#00000020',
+
         // justifyContent: "space-between",
         // alignItems: "center"
     },

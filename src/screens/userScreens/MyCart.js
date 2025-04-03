@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   decrementCounter,
   deleteProduct,
+  handleTotalPrice,
   incrementCounter,
   selectTotalPrice,
 } from '../../redux/reducer/ProductAddToCart';
@@ -37,16 +38,17 @@ const MyCart = ({ navigation }) => {
   const dispatch = useDispatch();
   const data = useSelector(state => state.cartProducts?.cartProducts);
   const { t } = useTranslation();
+  const {totalPrice} =useSelector(state => state.cartProducts);
 
-  const calculateTotalPrice = items => {
-    return items
-      .reduce((total, item) => {
-        return total + item.counter * parseFloat(item.price);
-      }, 0)
-      .toFixed(2);
-  };
+  // const calculateTotalPrice = items => {
+  //   return items
+  //     .reduce((total, item) => {
+  //       return total + item.counter * parseFloat(item.price);
+  //     }, 0)
+  //     .toFixed(2);
+  // };
 
-  const totalPrice = calculateTotalPrice(data);
+  // const totalPrice = calculateTotalPrice(data);
 
   const incrementProduct = id => {
     dispatch(incrementCounter(id));

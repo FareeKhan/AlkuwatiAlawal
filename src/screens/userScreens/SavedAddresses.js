@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, FlatList, I18nManager, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import ScreenView from '../../components/ScreenView'
 import HeaderBox from '../../components/HeaderBox'
@@ -6,19 +6,22 @@ import CustomText from '../../components/CustomText'
 import { useDispatch, useSelector } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { color } from '../../constants/color'
-import { deleteAddress, userShippingAddress } from '../../services/UserServices'
+import { deleteAddress, editAddress, userShippingAddress } from '../../services/UserServices'
 import { storeUserAddress } from '../../redux/reducer/UserShippingAddress'
 import { useTranslation } from 'react-i18next'
 import { Swipeable } from 'react-native-gesture-handler'
 import ScreenLoader from '../../components/ScreenLoader'
 import { useFocusEffect } from '@react-navigation/native'
+import EmptyScreen from '../../components/EmptyScreen'
+import Feather from 'react-native-vector-icons/Feather'
+
 
 const SavedAddresses = ({ navigation, route }) => {
     const { t } = useTranslation()
     const { isAdd } = route?.params || {}
     const userId = useSelector((state) => state.auth?.userId)
     const userAddress = useSelector((state) => state?.customerAddress?.storeAddress)
-    const addressId =isAdd?'': userAddress?.addressId
+    const addressId = isAdd ? '' : userAddress?.addressId
     const [data, setData] = useState()
     const [loader, setLoader] = useState(false)
     const [selectedItem, setSelectedItem] = useState(addressId)
@@ -31,21 +34,21 @@ const SavedAddresses = ({ navigation, route }) => {
 
     useFocusEffect(
         useCallback(() => {
-            getShippingAddress(); // Call the API again when the screen is focused
+            getShippingAddress(true); // Call the API again when the screen is focused
         }, [userId])
     );
 
 
-    const getShippingAddress = async () => {
-        setLoader(true);
+    const getShippingAddress = async (value) => {
+        setLoader(value);
         try {
             const response = await userShippingAddress(userId);
             if (response?.data?.length > 0) {
                 setData(response?.data)
                 setLoader(false);
-
             } else {
-                alert('something went wrong');
+                setData([])
+                dispatch(storeUserAddress({}))
                 setLoader(false);
             }
         } catch (error) {
@@ -74,16 +77,49 @@ const SavedAddresses = ({ navigation, route }) => {
     }
 
 
+    const deleteAlert = (id) => {
+        const title = I18nManager.isRTL ? `\u200F${t('deleteTitle')}` : t('deleteTitle');
+        Alert.alert('', t('sureDelete'), [
+            {
+                text: t('cancel'),
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+            },
+            { text: t('ok'), onPress: () => handleDelete(id) },
+        ]);
+    }
+
+
     const handleDelete = async (id) => {
+
         try {
             const response = await deleteAddress(id)
-            if (response?.status) {
-                alert(t('addressDeleted'))
+            console.log('showmeRepsonse', response)
+            if (response?.data == 'deleted') {
+                getShippingAddress(false)
             }
         } catch (error) {
             console.log('error', error)
         }
     }
+
+    const handleEdit = async (id) => {
+        navigation.navigate('ShippingAddress',{
+            id:id
+        })
+        // try {
+        //     const response = await editAddress(id)
+        //     console.log('showMeAEddit', response)
+        //     // if (response?.data == 'deleted') {
+        //     //     getShippingAddress(false)
+        //     // }
+        // } catch (error) {
+        //     console.log('error', error)
+        // }
+    }
+
+
+
 
     // const rightSwipe = (id) => {
     //     return (
@@ -115,6 +151,7 @@ const SavedAddresses = ({ navigation, route }) => {
 
 
     const renderItem = ({ item, index }) => {
+
         return (
             // <Swipeable renderRightActions={() => rightSwipe(item?.id)}>
             <TouchableOpacity onPress={() => handleAddress(item)} style={[styles.userAddressBox, selectedItem == item?.id && { borderColor: color.theme }]} >
@@ -126,14 +163,19 @@ const SavedAddresses = ({ navigation, route }) => {
                     <AddressLine label={t('Country')} value={item?.country} />
                 </View>
 
-                {/* <View>
-                    <CustomText> {item?.country}{item?.city} {item?.area} {item?.street} </CustomText>
-                    <CustomText>{`\u2066${item?.phone}\u2069`}</CustomText>
-                </View>*/}
-                {
+                <View>
+                    <TouchableOpacity onPress={() => handleEdit(item?.id)} style={{ alignSelf: "flex-start", paddingVertical: 10, paddingHorizontal: 15 }}>
+                        <Feather name={'edit'} size={18} color={'green'} />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => deleteAlert(item?.id)} style={{ alignSelf: "flex-start", paddingVertical: 10, paddingHorizontal: 15 }}>
+                        <Ionicons name={'trash'} size={20} color={'red'} />
+                    </TouchableOpacity>
+                </View>
+                {/* {
                     selectedItem == item?.id &&
                     <Ionicons name={'checkmark-circle'} color={color.theme} size={20} />
-                }
+                } */}
             </TouchableOpacity>
             // </Swipeable>
         )
@@ -165,6 +207,7 @@ const SavedAddresses = ({ navigation, route }) => {
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item, index) => index?.toString()}
                     style={{ flexGrow: 1 }}
+                    ListEmptyComponent={<EmptyScreen text={t('noAddress')} />}
                     ItemSeparatorComponent={<View style={{ marginBottom: 20 }} />}
                     contentContainerStyle={{ paddingBottom: 40 }}
                     renderItem={renderItem}
@@ -213,7 +256,8 @@ const styles = StyleSheet.create({
         borderColor: "#00000020",
 
         paddingVertical: 10,
-        paddingHorizontal: 20,
+        // paddingHorizontal: 20,
+        paddingLeft: 20,
         borderRadius: 20,
         flexDirection: "row",
         justifyContent: "space-between"

@@ -83,8 +83,8 @@ android {
         applicationId "com.alkwaityalawalapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 13
-        versionName "8.6"
+        versionCode 14
+        versionName "8.7"
     }
     signingConfigs {
         debug {

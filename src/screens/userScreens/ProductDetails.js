@@ -13,8 +13,8 @@ import ExportSvg from '../../constants/ExportSvg';
 import { color } from '../../constants/color';
 import ProductSlider from '../../components/ProductSlider';
 import { productDetails } from '../../services/UserServices';
-import { useDispatch } from 'react-redux';
-import { addProductToCart } from '../../redux/reducer/ProductAddToCart';
+import { useDispatch, useSelector } from 'react-redux';
+import { addProductToCart, handleTotalPrice } from '../../redux/reducer/ProductAddToCart';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import * as Animatable from 'react-native-animatable';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +24,7 @@ import HeaderBox from '../../components/HeaderBox';
 import ScreenLoader from '../../components/ScreenLoader';
 const ProductDetails = ({ navigation, route }) => {
   const dispatch = useDispatch();
+  const data = useSelector(state => state.cartProducts?.cartProducts);
   const { t } = useTranslation();
   const [isLoader, setIsLoader] = useState(false);
 
@@ -87,6 +88,20 @@ const ProductDetails = ({ navigation, route }) => {
           imgUrl == '' ? productData?.product_images[0]?.image_url : imgUrl,
       }),
     );
+    if (data?.length > 0) {
+      const finalPrice = data.reduce((total, item) => {
+        return total + item.counter * parseFloat(item.price);
+      }, 0)
+        .toFixed(2);
+      dispatch(handleTotalPrice(finalPrice))
+    } else {
+      const finalPrice = productOrder * parseFloat(productObject?.price)
+      dispatch(handleTotalPrice(finalPrice))
+    }
+
+
+
+
     if (id && selectedSize) {
       navigation.navigate('MyCart');
     }
@@ -122,9 +137,9 @@ const ProductDetails = ({ navigation, route }) => {
 
   return (
     <Animatable.View
-      animation={'slideInLeft'}
-      duration={1000}
-      delay={100}
+      // animation={'slideInLeft'}
+      // duration={1000}
+      // delay={100}
       style={{ flex: 1 }}>
       <View style={styles.mainContainer}>
         <ScrollView

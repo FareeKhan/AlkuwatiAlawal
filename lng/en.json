@@ -142,7 +142,15 @@
     "Bahrain": "Bahrain",
     "Qatar": "Qatar",
     "Oman": "Oman",
-     "fillAll":"Please Fill All the Fields"
+     "fillAll":"Please Fill All the Fields",
+     "deleteTitle":"Delete Alert",
+     "sureDelete":"Are you sure you want to delete this address?",
+     "noAddress":"No Address Found",
+     "promoCoder":"Promo Code",
+     "enderPromo":"Enter Promo Code",
+     "promoExpire":"Promo Code is Expired",
+     "PleasePromo":"Please Enter Promo Coder",
+
 
 
 

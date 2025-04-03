@@ -17,6 +17,8 @@ import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 import {
   addShippingAddress,
+  editAddress,
+  editShippingAddress,
   userShippingAddress,
 } from '../../services/UserServices';
 import CustomLoader from '../../components/CustomLoader';
@@ -30,22 +32,12 @@ import CustomDropDown from '../../components/CustomDropDown';
 import ScreenView from '../../components/ScreenView';
 
 const ShippingAddress = ({ navigation, route }) => {
-  const { totalPrice } = route?.params || '';
-  const { btnText } = route.params ?? '';
-  // const userAddress = useSelector(
-  //   state => state?.customerAddress,
-  // );
-  // const userAddress = useSelector((state) => state?.customerAddress?.storeAddress)
-  const userAddress = {}
-  const userId = useSelector(state => state.auth.userId);
-  const { t } = useTranslation();
-
-
-  // forStoring zipCode and countryCode i am using Api param block_avenue and emirates
+  const { id,btnText } = route.params ?? '';
   const dispatch = useDispatch();
 
+  const [userAddress,setUserAddress] = useState({})
   const displayNumber = userAddress?.phone?.startsWith('+965') ? userAddress?.phone.slice(4) : userAddress?.phone;
-  const [fullName, setFullName] = useState(userAddress?.fullName);
+  const [fullName, setFullName] = useState(userAddress?.full_name);
   const [street, setStreet] = useState(userAddress?.street);
   const [city, setCity] = useState(userAddress?.city);
   const [area, setArea] = useState(userAddress?.area);
@@ -62,37 +54,44 @@ const ShippingAddress = ({ navigation, route }) => {
   const [showGover, setShowGover] = useState(false);
 
 
+  // const userAddress = useSelector(
+  //   state => state?.customerAddress,
+  // );
+  // const userAddress = useSelector((state) => state?.customerAddress?.storeAddress)
+  // const userAddress = {}
+  const userId = useSelector(state => state.auth.userId);
+  const { t } = useTranslation();
+
+  useEffect(()=>{
+    handleEdit()
+  },[]) 
+
+  useEffect(()=>{
+    const displayNumber = userAddress?.phone?.startsWith('+965') ? userAddress?.phone.slice(4) : userAddress?.phone;
+    setFullName(userAddress?.full_name)
+    setCity(userAddress?.city)
+    setArea(userAddress?.area)
+    setPhoneNumber(displayNumber)
+    setPiece(userAddress?.street)
+    setEmail(userAddress?.email)
+    setCountry(userAddress?.country)
+  },[userAddress])
+
+  console.log('showiiiin',fullName)
 
 
-  const openPicker = useCallback(() => {
-    Keyboard.dismiss();
-    setShowCountry(true);
-  }, [showCountry]);
+  const handleEdit = async () => {
+    try {
+        const response = await editAddress(id)
+        console.log('showMeAEddit', response)
+        if (response?.data?.length>0) {
+          setUserAddress(response?.data[0])
+        }
+    } catch (error) {
+        console.log('error', error)
+    }
+}
 
-  const hidePicker = useCallback(
-    item => {
-      setShowCountry(false);
-      setCountry(item);
-    },
-    [showCountry, country],
-  );
-
-  const openPickerGover = useCallback(() => {
-    Keyboard.dismiss();
-    setShowGover(true);
-  }, [showGover]);
-
-  const hidePickerGover = useCallback(
-    item => {
-      setShowGover(false);
-      setArea(item);
-    },
-    [showGover, area],
-  );
-
-  useEffect(() => {
-    // getShippingAddress()
-  }, []);
 
   const countries_ar = [
     {
@@ -121,7 +120,6 @@ const ShippingAddress = ({ navigation, route }) => {
     }
   ];
   
-
   const countries_en = [
     {
       label: t('Kuwait'),
@@ -149,7 +147,6 @@ const ShippingAddress = ({ navigation, route }) => {
     }
   ];
   
-
   const governorate_ar = [
     {
       label: 'محافظة العاصمة',
@@ -178,7 +175,6 @@ const ShippingAddress = ({ navigation, route }) => {
 
   ];
 
-
   const governorate_en = [
     {
       label: 'Al Asima',
@@ -206,11 +202,11 @@ const ShippingAddress = ({ navigation, route }) => {
     },
   ];
 
-  useEffect(() => { }, [userAddress]);
+  // useEffect(() => { }, [userAddress]);
 
   const handlePress = async () => {
     // console.log(phoneNumber?.slice(1),'phoneNumber')
-
+console.log('trending')
     if(fullName== ''|| piece == '' || city == '' || piece == '' || email == '' || area == '' || country == ''){
       alert(t('fillAll'))
       return
@@ -232,9 +228,11 @@ const ShippingAddress = ({ navigation, route }) => {
           country: country,
         };
         console.log(addressredux, 'addressredux');
-        const response = await addShippingAddress(addressredux,userId)
-        if (response?.data?.id) {
-          dispatch(storeUserAddress({ ...addressredux, addressId: response.data.id }));
+        const response = await (userAddress ? editShippingAddress(addressredux,userId,id):  addShippingAddress(addressredux,userId))
+       
+       console.log('robinnnnn',response)
+        if (response?.data) {
+          dispatch(storeUserAddress({ ...addressredux, addressId:id?id: response.data.id }));
           setIsLoader(false)
             Alert.alert(
           t(''), 
@@ -364,7 +362,7 @@ const ShippingAddress = ({ navigation, route }) => {
         <View style={{ flexDirection: 'row' }}>
           <Text style={[styles.productName]}>{t('shipaddress')}</Text>
         </View>
-
+{/* 
         <CustomInput
           placeholder={t('email')}
           title={t('email')}
@@ -373,7 +371,7 @@ const ShippingAddress = ({ navigation, route }) => {
           onChangeText={setEmail}
           autoCapitalize={false}
           keyboardType={'email'}
-        />
+        /> */}
         <View style={{ marginTop: 20 }}>
           <Text
             style={{ textAlign: 'left', marginBottom: 10, color: color.theme }}>

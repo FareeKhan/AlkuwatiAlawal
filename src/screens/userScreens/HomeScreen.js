@@ -1,6 +1,7 @@
 import {
   Dimensions,
   FlatList,
+  Image,
   ImageBackground,
   LogBox,
   Platform,
@@ -49,6 +50,7 @@ const HomeScreen = ({ navigation }) => {
 
   const { openDrawer } = navigation;
   const [banner, setBanner] = useState([]);
+  const [secBanners, setSecBanners] = useState([]);
   const [arrivalData, setArrivalData] = useState([]);
   const [arrivalDataTwo, setArrivalDataTwo] = useState([]);
   const [arrivalDataThree, setArrivalDataThree] = useState([]);
@@ -61,6 +63,7 @@ const HomeScreen = ({ navigation }) => {
   const [getOptionNameTwo, setOptionNameTwo] = useState();
   const [getOptionNameThree, setOptionNameThree] = useState();
   const [getOptionWhatsApp, setOptionWhatsApp] = useState();
+  const [arrivalCategories, setArrivalCategories] = useState([]);
 
   const viewRef = useRef(null);
   const animation = 'fadeInRightBig';
@@ -75,8 +78,6 @@ const HomeScreen = ({ navigation }) => {
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
   }, []);
 
-  console.log('farrere', data?.length);
-
   useEffect(() => {
     discountHomeBanner();
     funCategories();
@@ -89,12 +90,27 @@ const HomeScreen = ({ navigation }) => {
       const result = await getSettingOption();
       console.log('--?>>', result)
       if (result?.status) {
-        setLoader(false);
-        getNewArrivals(result?.data[20].value);
-        getNewArrivalsTwo(result?.data[21].value);
-        getNewArrivalsThree(result?.data[22].value);
-        setOption(result?.data);
-      } 
+        // setSetting(result?.data);
+        let categories = result?.data?.filter((item) => item.name === 'home_category');
+        setArrivalCategories(categories);
+
+        categories?.map((item) => {
+          console.log(item.value);
+          getNewArrivals(item.value);
+        });
+
+        // getNewArrivals(result?.data[20].value);
+        // getNewArrivals(result?.data[21].value);
+        // getNewArrivals(result?.data[22].value);
+        // setOption(result?.data);
+      }
+      // if (result?.status) {
+      //   setLoader(false);
+      //   getNewArrivals(result?.data[20].value);
+      //   getNewArrivalsTwo(result?.data[21].value);
+      //   getNewArrivalsThree(result?.data[22].value);
+      //   setOption(result?.data);
+      // }
     } catch (error) {
       console.log(error);
     }
@@ -123,8 +139,10 @@ const HomeScreen = ({ navigation }) => {
       const result = await homeBanner();
       if (result?.status) {
         setLoader(false);
-
-        setBanner(result?.data);
+        const mainBanners = result?.data?.filter((item, index) => item?.banner_type !== 'section_banner')
+        const secondaryBanners = result?.data?.filter((item, index) => item?.banner_type == 'section_banner')
+        setBanner(mainBanners);
+        setSecBanners(secondaryBanners);
       } else {
         setLoader(false);
       }
@@ -135,21 +153,28 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const getNewArrivals = async name => {
+
     try {
       const result = await newArrivals(name);
-      console.log('-->>', result)
+      console.log('-->>trending', result)
       if (result?.status) {
-        setIsLoader(false);
-        setArrivalData(result?.data);
-        setOptionNameOne(name);
+        // setIsLoader(false);
+        // setArrivalData(result?.data);
+        setArrivalData(prev => [...prev, result?.data]);
+        // setOptionNameOne(name);
       } else {
         setIsLoader(false);
       }
     } catch (error) {
+      
       setIsLoader(false);
       console.log(error);
+    }finally{
+      setLoader(false);
     }
   };
+
+
 
   const getNewArrivalsTwo = async name => {
     try {
@@ -167,8 +192,6 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  console.log('arrivalDataTwo', arrivalData)
-
   const getNewArrivalsThree = async name => {
     try {
       const result = await newArrivals(name);
@@ -184,8 +207,6 @@ const HomeScreen = ({ navigation }) => {
       console.log(error);
     }
   };
-
-
 
   const renderItem = ({ item, index }) => {
     return (
@@ -279,6 +300,9 @@ const HomeScreen = ({ navigation }) => {
   }
 
 
+  console.log('shehzadData', arrivalData)
+
+
   return (
     <View style={styles.mainContainer}>
       <HeaderBox
@@ -286,7 +310,7 @@ const HomeScreen = ({ navigation }) => {
         cartIcon={true}
       />
 
-    
+
 
       <View style={{ flexDirection: 'row' }}>
         <Text style={styles.welcomeTxt}>{t('welcome')}</Text>
@@ -361,7 +385,99 @@ const HomeScreen = ({ navigation }) => {
           />
         </View>
 
-        {arrivalData.length > 0 && (
+        {/* <>
+          <View style={styles.arrivalBox}>
+            <Text style={styles.arrivalTxt}>{getOptionNameOne}</Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('SameProduct', {
+                selected: getOptionNameOne,
+                subC_ID: 48
+              })}>
+              <Text style={styles.viewTxt}>{t('view_all')}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <FlatList
+              horizontal
+              data={arrivalData}
+              keyExtractor={(item, index) => index?.toString()}
+              renderItem={renderArrivalItem}
+              showsVerticalScrollIndicator={false}
+              snapToInterval={ITEM_WIDTH + ITEM_MARGIN * 0.2}
+              snapToAlignment="start"
+              decelerationRate="fast"
+            //numColumns={2}
+            //columnWrapperStyle={{ justifyContent: "space-between", flexGrow: 1 }}
+            />
+          </View>
+        </> */}
+
+
+        {
+          arrivalCategories?.map((item, index) => {
+            return (
+              <>
+                {
+                  arrivalData[index]?.length > 0 &&
+                  <View style={styles.arrivalBox}>
+                    <Text style={styles.arrivalTxt}>{item?.value}</Text>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('SameProduct', {
+                        selected: item?.value,
+                        subC_ID: 48
+                      })}>
+                      <Text style={styles.viewTxt}>{t('view_all')}</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                }
+
+
+                <View style={{ flex: 1 }}>
+                  <FlatList
+                    horizontal
+                    data={arrivalData[index]}
+                    keyExtractor={(item, index) => index?.toString()}
+                    renderItem={renderArrivalItem}
+                    showsVerticalScrollIndicator={false}
+                    snapToInterval={ITEM_WIDTH + ITEM_MARGIN * 0.2}
+                    snapToAlignment="start"
+                    decelerationRate="fast"
+                  //numColumns={2}
+                  //columnWrapperStyle={{ justifyContent: "space-between", flexGrow: 1 }}
+                  />
+
+
+
+
+                  {secBanners?.map((banner) => {
+                    console.log('showmeBannnerssss',banner)
+                    return (
+                      banner.show_after_section_number === (index) && (
+                        // <div className="section-banner my-4" key={`banner-${banner.id}`}>
+                        //   <img
+                        //     src={banner.image}
+                        //     alt={banner.link_category}
+                        //     className="img-fluid w-100"
+                        //     style={{ maxHeight: '300px', objectFit: 'cover' }}
+                        //   />
+                        // </div>
+
+                         <Image source={{ uri: banner.image }}    borderRadius={10}           style={{ width: "100%" , height: 180,marginVertical:15 }}/>
+
+                      )
+                    )
+                  })}
+                </View>
+              </>
+            )
+          })
+        }
+
+
+
+        {/* {arrivalData.length > 0 && (
           <>
             <View style={styles.arrivalBox}>
               <Text style={styles.arrivalTxt}>{getOptionNameOne}</Text>
@@ -449,7 +565,7 @@ const HomeScreen = ({ navigation }) => {
               />
             </View>
           </>
-        )}
+        )} */}
       </ScrollView>
 
       <SearchModal

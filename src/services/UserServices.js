@@ -12,7 +12,6 @@ export const homeBanner = async () => {
 
         const result = await response.json();
         return result;
-
     } catch (e) {
         console.log('oo', e)
     }
@@ -98,6 +97,42 @@ export const productDetails = async (id) => {
 };
 
 
+export const editShippingAddress = async (address,userID,id) => {
+
+    try {
+        const response = await fetch(`${baseUrl}/address/${id}/update`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+            body: JSON.stringify({
+                "block_avenue": 'block_avenue',
+                "street": address?.street,
+                "house": "house",
+                "area": address?.area,
+                "city": address?.city,
+                "country": address?.country,
+                "governorate": "governorate",
+                "user_id": userID,
+                "full_name": address?.fullName,
+                "phone": address?.phone,
+                "address":'address',
+                "emirates": 'emirates'
+            })
+        });
+
+        const result = await response.json();
+        return result;
+
+    } catch (e) {
+        console.log('oo', e)
+    }
+};
+
+
+
+
 export const addShippingAddress = async (address,userID) => {
     console.log('--',address)
 
@@ -151,6 +186,42 @@ export const userShippingAddress = async (id) => {
     }
 };
 
+export const promoCodes = async (id) => {
+    try {
+        const response = await fetch(`${baseUrl}/promocodes`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+        });
+
+        const result = await response.json();
+        return result;
+
+    } catch (e) {
+        console.log('oo', e)
+    }
+};
+
+export const postPromoCoder = async (value) => {
+   const codeValue = value.toUpperCase();
+    try {
+        const response = await fetch(`${baseUrl}/getPromoCode?code=${codeValue}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+        });
+
+        const result = await response.json();
+        return result;
+
+    } catch (e) {
+        console.log('oo', e)
+    }
+};
 
 
 export const orderConfirmed = async (productNo, address, totalPrice, data, email, userID, token_obj) => {
@@ -236,8 +307,8 @@ export const getOrder = async (id) => {
 
 export const deleteAddress = async (id) => {
     try {
-        const response = await fetch(`${baseUrl}/address/${id}`, {
-            method: 'DELETE',
+        const response = await fetch(`${baseUrl}/address/${id}/delete`, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 Accept: 'application/json',
@@ -250,6 +321,35 @@ export const deleteAddress = async (id) => {
         console.log('oo', e)
     }
 };
+
+export const editAddress = async (id) => {
+    try {
+        const response = await fetch(`${baseUrl}/address/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+            },
+        });
+        const result = await response.json();
+        return result;
+
+    } catch (e) {
+        console.log('oo', e)
+    }
+};
+
+// const startEditing = async (addressId) => {
+//     try {
+//       const response = await axios.get(`${BASE_URL}address/${addressId}`);
+//       if (response.data.data && response.data.data[0]) {
+//         setEditingAddress(response.data.data[0]);
+//         setShowAddForm(true);
+//       }
+//     } catch (error) {
+//       console.error('Error fetching address:', error);
+//     }
+//   };
 
 export const personalData = async (id) => {
     try {
@@ -370,7 +470,7 @@ export const searchProductByName = async (productName) => {
 
 export const categoriesList = async (id) => {
     try {
-        const response = await fetch(`${baseUrl}/getCategories`, {
+        const response = await fetch(`${baseUrl}/getCategories?type=parent`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

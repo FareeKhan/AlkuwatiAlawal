@@ -73,7 +73,7 @@ const SingleProductCard = ({ item, index, onPress, countList = 1, isShowPlusIcon
   const endX = -150; // Move to the left side (for RTL)
   const endY = 50; // Move to the top (cart position)
 
-  console.log('fammm', item)
+
 
   // end of new code
   useEffect(() => {
