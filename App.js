@@ -145,9 +145,10 @@ const App = () => {
   }, []);
 
   const linking = {
-    prefixes: [
-      'https://nextjs-sample-ten-cyan.vercel.app',
-    ],
+    prefixes: Platform.select({
+      ios: ['https://nextjs-sample-ten-cyan.vercel.app'],
+      android: ['https://nextjs-sample-ten-cyan.vercel.app/productDetails'],
+    }),
     config: {
       screens: {
         // Drawer Navigation
