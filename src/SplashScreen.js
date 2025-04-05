@@ -1,4 +1,4 @@
-import { I18nManager, StyleSheet, Text, View } from 'react-native'
+ import { I18nManager, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { color } from './constants/color'
 import ExportSvg from './constants/ExportSvg'
@@ -11,7 +11,6 @@ import { loginData, isLogin } from './redux/reducer/Auth'
 const SplashScreen = ({ navigation }) => {
     //const dispatch = useDispatch()
   const isLanguage = useSelector(state => state.auth?.isLanguage);
-
     useEffect(()=>{
       if (isLanguage === 'ar') {
         I18nManager.forceRTL(true);
@@ -21,13 +20,8 @@ const SplashScreen = ({ navigation }) => {
         I18nManager.allowRTL(false);
       }
 ;
-
     
     },[isLanguage])
-
-
-
-
 
     return (
         <View style={styles.mainContainer}>

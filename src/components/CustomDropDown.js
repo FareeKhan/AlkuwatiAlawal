@@ -95,15 +95,18 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         fontSize: 14,
         // backgroundColor: 'green',
-
     },
     placeholderStyle: {
         fontSize: 14,
         color:"#ccc",
+        textAlign: 'left',
+        paddingLeft:5
     },
     selectedTextStyle: {
         fontSize: 13,
         color:color.black,
+        textAlign: 'left',
+        paddingLeft:5
     },
     iconStyle: {
         width: 20,

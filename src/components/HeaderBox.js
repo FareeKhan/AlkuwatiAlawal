@@ -1,5 +1,5 @@
 import { I18nManager, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { DrawerActions, useNavigation } from '@react-navigation/native'
 import ExportSvg from '../constants/ExportSvg';
 import HeaderLogo from './HeaderLogo';
@@ -10,8 +10,10 @@ import { color } from '../constants/color';
 const HeaderBox = ({ isDrawer, catName, share, onPressShare, cartIcon, bagIcon,style }) => {
     const navigation = useNavigation()
     const data = useSelector(state => state.cartProducts?.cartProducts);
-
-
+ useEffect(() => {
+    navigation.dispatch(DrawerActions.closeDrawer())
+    }
+        , [])
     return (
         <View style={[styles.headerContainer,style]}>
 

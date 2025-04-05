@@ -11,8 +11,8 @@ import {
   FlatList,
   I18nManager,
 } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { color } from '../../constants/color';
+import React, {useCallback, useEffect, useState} from 'react';
+import {color} from '../../constants/color';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 import {
@@ -22,21 +22,23 @@ import {
   userShippingAddress,
 } from '../../services/UserServices';
 import CustomLoader from '../../components/CustomLoader';
-import { useDispatch, useSelector } from 'react-redux';
-import { storeUserAddress } from '../../redux/reducer/UserShippingAddress';
+import {useDispatch, useSelector} from 'react-redux';
+import {storeUserAddress} from '../../redux/reducer/UserShippingAddress';
 import ScreenLoader from '../../components/ScreenLoader';
 import HeaderLogo from '../../components/HeaderLogo';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import CustomDropDown from '../../components/CustomDropDown';
 import ScreenView from '../../components/ScreenView';
 
-const ShippingAddress = ({ navigation, route }) => {
-  const { id,btnText } = route.params ?? '';
+const ShippingAddress = ({navigation, route}) => {
+  const {id, btnText} = route.params ?? '';
   const dispatch = useDispatch();
 
-  const [userAddress,setUserAddress] = useState({})
-  const displayNumber = userAddress?.phone?.startsWith('+965') ? userAddress?.phone.slice(4) : userAddress?.phone;
+  const [userAddress, setUserAddress] = useState({});
+  const displayNumber = userAddress?.phone?.startsWith('+965')
+    ? userAddress?.phone.slice(4)
+    : userAddress?.phone;
   const [fullName, setFullName] = useState(userAddress?.full_name);
   const [street, setStreet] = useState(userAddress?.street);
   const [city, setCity] = useState(userAddress?.city);
@@ -44,6 +46,7 @@ const ShippingAddress = ({ navigation, route }) => {
   const [phoneNumber, setPhoneNumber] = useState(displayNumber);
   const [piece, setPiece] = useState(userAddress?.piece);
   const [email, setEmail] = useState(userAddress?.email);
+  const [villa, setVilla] = useState(userAddress?.email);
   const [zipCode, setZipCode] = useState(userAddress?.zipCode);
   const [countryCode, setCountryCode] = useState(userAddress?.countryCode);
   const [address, setAddress] = useState(userAddress?.address);
@@ -53,152 +56,150 @@ const ShippingAddress = ({ navigation, route }) => {
   const [showCountry, setShowCountry] = useState(false);
   const [showGover, setShowGover] = useState(false);
 
-
   // const userAddress = useSelector(
   //   state => state?.customerAddress,
   // );
   // const userAddress = useSelector((state) => state?.customerAddress?.storeAddress)
   // const userAddress = {}
   const userId = useSelector(state => state.auth.userId);
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
-  useEffect(()=>{
-    handleEdit()
-  },[]) 
+  useEffect(() => {
+    handleEdit();
+  }, []);
 
-  useEffect(()=>{
-    const displayNumber = userAddress?.phone?.startsWith('+965') ? userAddress?.phone.slice(4) : userAddress?.phone;
-    setFullName(userAddress?.full_name)
-    setCity(userAddress?.city)
-    setArea(userAddress?.area)
-    setPhoneNumber(displayNumber)
-    setPiece(userAddress?.street)
-    setEmail(userAddress?.email)
-    setCountry(userAddress?.country)
-  },[userAddress])
+  useEffect(() => {
+    const displayNumber = userAddress?.phone?.startsWith('+965')
+      ? userAddress?.phone.slice(4)
+      : userAddress?.phone;
+    setFullName(userAddress?.full_name);
+    setCity(userAddress?.city);
+    setArea(userAddress?.area);
+    setPhoneNumber(displayNumber);
+    setPiece(userAddress?.street);
+    setEmail(userAddress?.email);
+    setCountry(userAddress?.country);
+  }, [userAddress]);
 
-  console.log('showiiiin',fullName)
-
+  console.log('showiiiin', fullName);
 
   const handleEdit = async () => {
     try {
-        const response = await editAddress(id)
-        console.log('showMeAEddit', response)
-        if (response?.data?.length>0) {
-          setUserAddress(response?.data[0])
-        }
+      const response = await editAddress(id);
+      console.log('showMeAEddit', response);
+      if (response?.data?.length > 0) {
+        setUserAddress(response?.data[0]);
+      }
     } catch (error) {
-        console.log('error', error)
+      console.log('error', error);
     }
-}
-
+  };
 
   const countries_ar = [
     {
       label: 'الكويت',
-      id: 1
+      id: 1,
     },
     {
       label: 'المملكة العربية السعودية',
-      id: 2
+      id: 2,
     },
     {
       label: 'الإمارات العربية المتحدة',
-      id: 3
+      id: 3,
     },
     {
       label: 'البحرين',
-      id: 4
+      id: 4,
     },
     {
       label: 'قطر',
-      id: 5
+      id: 5,
     },
     {
       label: 'عمان',
-      id: 6
-    }
+      id: 6,
+    },
   ];
-  
+
   const countries_en = [
     {
       label: t('Kuwait'),
-      id: 1
+      id: 1,
     },
     {
       label: t('Saudi Arabia'),
-      id: 2
+      id: 2,
     },
     {
       label: t('United Arab Emirates'),
-      id: 3
+      id: 3,
     },
     {
       label: t('Bahrain'),
-      id: 4
+      id: 4,
     },
     {
       label: t('Qatar'),
-      id: 5
+      id: 5,
     },
     {
       label: t('Oman'),
-      id: 6
-    }
+      id: 6,
+    },
   ];
-  
+
   const governorate_ar = [
     {
       label: 'محافظة العاصمة',
-      id: 1
+      id: 1,
     },
     {
       label: 'محافظة حولي',
-      id: 2
+      id: 2,
     },
     {
       label: 'محافظة الأحمدي',
-      id: 3
+      id: 3,
     },
     {
       label: 'محافظة الجهراء',
-      id: 4
+      id: 4,
     },
     {
       label: 'محافظة الفروانية',
-      id: 5
+      id: 5,
     },
     {
       label: 'محافظة مبارك الكبير',
-      id: 6
+      id: 6,
     },
-
   ];
 
   const governorate_en = [
     {
       label: 'Al Asima',
-      id: 1
+      id: 1,
     },
     {
       label: 'Hawally',
-      id: 2
+      id: 2,
     },
     {
       label: 'Mubarak Al Kabir',
-      id: 3
+      id: 3,
     },
     {
       label: 'Ahmadi',
-      id: 4
+      id: 4,
     },
     {
       label: 'Farwaniya',
-      id: 5
+      id: 5,
     },
     {
       label: 'Jahra',
-      id: 6
+      id: 6,
     },
   ];
 
@@ -206,12 +207,20 @@ const ShippingAddress = ({ navigation, route }) => {
 
   const handlePress = async () => {
     // console.log(phoneNumber?.slice(1),'phoneNumber')
-console.log('trending')
-    if(fullName== ''|| piece == '' || city == '' || piece == '' || email == '' || area == '' || country == ''){
-      alert(t('fillAll'))
-      return
+    console.log('trending');
+    if (
+      fullName == '' ||
+      piece == '' ||
+      city == '' ||
+      piece == '' ||
+      email == '' ||
+      area == '' ||
+      country == ''
+    ) {
+      alert(t('fillAll'));
+      return;
     }
-    setIsLoader(true)
+    setIsLoader(true);
     try {
       if (phoneNumber.length == 8) {
         let updatedPhoneNumber =
@@ -226,34 +235,37 @@ console.log('trending')
           area: area,
           phone: updatedPhoneNumber,
           country: country,
+          villa: villa,
         };
         console.log(addressredux, 'addressredux');
-        const response = await (userAddress ? editShippingAddress(addressredux,userId,id):  addShippingAddress(addressredux,userId))
-       
-       console.log('robinnnnn',response)
+        const response = await (userAddress
+          ? editShippingAddress(addressredux, userId, id)
+          : addShippingAddress(addressredux, userId));
+
+        console.log('robinnnnn', response);
         if (response?.data) {
-          dispatch(storeUserAddress({ ...addressredux, addressId:id?id: response.data.id }));
-          setIsLoader(false)
-            Alert.alert(
-          t(''), 
-          t('addressSaved'), 
-          [
-            { text: t('ok'), onPress: () => navigation.goBack() }
-          ],
-          {
-            textAlign: I18nManager.isRTL ? 'right' : 'left'  // Align title based on language direction
-          }
-        );
-        }else{
-          console.log('sss',response)
+          dispatch(
+            storeUserAddress({
+              ...addressredux,
+              addressId: id ? id : response.data.id,
+            }),
+          );
+          setIsLoader(false);
+          Alert.alert(
+            t(''),
+            t('addressSaved'),
+            [{text: t('ok'), onPress: () => navigation.goBack()}],
+            {
+              textAlign: I18nManager.isRTL ? 'right' : 'left', // Align title based on language direction
+            },
+          );
+        } else {
+          console.log('sss', response);
         }
 
-
-
-
         // Alert.alert(
-        //   t(''), 
-        //   t('addressSaved'), 
+        //   t(''),
+        //   t('addressSaved'),
         //   [
         //     { text: t('ok'), onPress: () => navigation.goBack() }
         //   ],
@@ -269,18 +281,15 @@ console.log('trending')
         // }
       } else if (phoneNumber.length > 8) {
         Alert.alert(t('isNotValid'));
-  
-      }
-      else {
+      } else {
         Alert.alert(t('fillNo'));
-  
       }
     } catch (error) {
-      console.log('error',error)
-    }finally{
-      setIsLoader(false)
+      console.log('error', error);
+    } finally {
+      setIsLoader(false);
     }
-  
+
     //setIsLoader(true)
     /* try {
              const response = await addShippingAddress(fullName, street, city, area, phoneNumber, address, zipCode, countryCode, country, userId)
@@ -306,7 +315,6 @@ console.log('trending')
          }*/
   };
 
-
   // const getShippingAddress = async () => {
   //   setLoader(true);
   //   try {
@@ -331,12 +339,15 @@ console.log('trending')
     return <ScreenLoader />;
   }
 
-  console.log('country',country)
+  console.log('country', country);
 
   return (
-    <ScreenView scrollable={true} style={{paddingTop:40}}>
+    // <View scrollable={true} style={{paddingTop:60}}>
+    <View style={{marginHorizontal: 20, paddingTop: 40}}>
+      <ScrollView
+        contentContainerStyle={{flexGrow: 1, paddingBottom: 150}}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.headerContainer}>
-
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons
               size={40}
@@ -359,10 +370,10 @@ console.log('trending')
             </View>
           )}
         </View>
-        <View style={{ flexDirection: 'row' }}>
+        <View style={{flexDirection: 'row'}}>
           <Text style={[styles.productName]}>{t('shipaddress')}</Text>
         </View>
-{/* 
+        {/* 
         <CustomInput
           placeholder={t('email')}
           title={t('email')}
@@ -372,9 +383,9 @@ console.log('trending')
           autoCapitalize={false}
           keyboardType={'email'}
         /> */}
-        <View style={{ marginTop: 20 }}>
+        <View style={{marginTop: 20}}>
           <Text
-            style={{ textAlign: 'left', marginBottom: 10, color: color.theme }}>
+            style={{textAlign: 'left', marginBottom: 10, color: color.theme}}>
             {t('phoneNumber')}
           </Text>
           <View
@@ -386,7 +397,7 @@ console.log('trending')
               borderBottomColor: '#ccc',
               // paddingBottom: 10,
             }}>
-            <Text style={{ color: "#000" }}>{'\u2066+965\u2069'}</Text>
+            <Text style={{color: '#000'}}>{'\u2066+965\u2069'}</Text>
             <TextInput
               placeholder={t('phoneNumber')}
               value={phoneNumber}
@@ -394,15 +405,19 @@ console.log('trending')
               onChangeText={setPhoneNumber}
               autoCorrect={false}
               maxLength={10}
-              style={{ color: "#000",     textAlign: "left", writingDirection:"rtl" }}
-              placeholderTextColor={"#cecece"}
+              style={{
+                color: '#000',
+                textAlign: 'left',
+                writingDirection: 'rtl',
+              }}
+              placeholderTextColor={'#cecece'}
             />
           </View>
         </View>
         <CustomInput
           placeholder={t('typename')}
           title={t('fName')}
-          style={{ marginTop: 20 }}
+          style={{marginTop: 20}}
           value={fullName}
           onChangeText={setFullName}
         />
@@ -410,7 +425,7 @@ console.log('trending')
         <CustomInput
           placeholder={t('avenue')}
           title={t('avenue')}
-          style={{ marginTop: 20 }}
+          style={{marginTop: 20}}
           value={piece}
           onChangeText={setPiece}
         />
@@ -418,11 +433,18 @@ console.log('trending')
         <CustomInput
           placeholder={t('City')}
           title={t('City')}
-          style={{ marginTop: 20 }}
+          style={{marginTop: 20}}
           value={city}
           onChangeText={setCity}
         />
 
+        <CustomInput
+          placeholder={t('villa')}
+          title={t('villa')}
+          style={{marginTop: 20}}
+          value={villa}
+          onChangeText={setVilla}
+        />
 
         <CustomDropDown
           data={I18nManager.isRTL ? countries_ar : countries_en}
@@ -432,43 +454,47 @@ console.log('trending')
           value={country}
         />
 
-{
-  country == t('Kuwait') ? 
-  <CustomDropDown
-  data={I18nManager.isRTL ? governorate_ar : governorate_en}
-  title={t('governorate')}
-  placeholder={t('governorate')}
-  setValue={setArea}
-  value={area}
-/>
+        {country == t('Kuwait') ? (
+          <CustomDropDown
+            data={I18nManager.isRTL ? governorate_ar : governorate_en}
+            title={t('governorate')}
+            placeholder={t('governorate')}
+            setValue={setArea}
+            value={area}
+          />
+        ) : (
+          <View>
+            <Text
+              style={{
+                textAlign: 'left',
+                marginBottom: 10,
+                color: color.theme,
+                marginTop: 20,
+              }}>
+              {t('governorate')}
+            </Text>
 
-:
-<View>
-
-
-<Text
-style={{ textAlign: 'left', marginBottom: 10, color: color.theme,marginTop:20 }}>
-{t('governorate')}
-
-</Text>
-
-<TextInput
-       placeholder={t('governorate')}
+            <TextInput
+              placeholder={t('governorate')}
               value={area}
               onChangeText={setArea}
               autoCorrect={false}
               maxLength={10}
-              style={{ color: "#000", paddingHorizontal:10,textAlign:I18nManager.isRTL? "right": "left", writingDirection:"rtl",       backgroundColor: '#cccccc70',borderRadius:7 }}
-              placeholderTextColor={"#cecece"}
+              style={{
+                color: '#000',
+                height: 50,
+                paddingHorizontal: 10,
+                textAlign: I18nManager.isRTL ? 'right' : 'left',
+                writingDirection: 'rtl',
+                backgroundColor: '#cccccc70',
+                borderRadius: 7,
+              }}
+              placeholderTextColor={'#cecece'}
             />
-</View>
+          </View>
+        )}
 
-}
-       
-     
-
-
-        <View style={{ marginTop: 50 }}>
+        <View style={{marginTop: 50}}>
           {isLoader ? (
             <CustomLoader />
           ) : (
@@ -488,15 +514,15 @@ style={{ textAlign: 'left', marginBottom: 10, color: color.theme,marginTop:20 }}
             />
           )}
         </View>
-{/* </KeyboardAvoidingView> */}
-    </ScreenView>
+        {/* </KeyboardAvoidingView> */}
+      </ScrollView>
+    </View>
   );
 };
 
 export default ShippingAddress;
 
 const styles = StyleSheet.create({
- 
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -515,46 +541,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Bold',
   },
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import {
 //   Alert,
@@ -615,7 +601,6 @@ const styles = StyleSheet.create({
 //   const [loader, setLoader] = useState(false);
 //   const [showCountry, setShowCountry] = useState(false);
 //   const [showGover, setShowGover] = useState(false);
-
 
 //   const openPicker = useCallback(() => {
 //     Keyboard.dismiss();
@@ -719,11 +704,11 @@ const styles = StyleSheet.create({
 //                          totalPrice: totalPrice
 //                      })
 //                  }
- 
+
 //              } else {
 //                  setIsLoader(false)
 //                  alert('Your Data is not Correct')
- 
+
 //              }
 //          } catch (error) {
 //              setIsLoader(false)
