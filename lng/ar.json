@@ -143,7 +143,9 @@
   "promoCoder": "رمز العرض",
   "enderPromo": "رمز",
   "promoExpire": "انتهت صلاحية رمز العرض",
-  "PleasePromo": "يرجى إدخال رمز العرض"
+  "PleasePromo": "يرجى إدخال رمز العرض",
+  "villa":"الفيلا / الشقة",
+  "addAddress": "يرجى إضافة العنوان"
 
 
 }

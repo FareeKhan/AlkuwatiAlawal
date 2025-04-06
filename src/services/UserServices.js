@@ -154,7 +154,7 @@ export const addShippingAddress = async (address,userID) => {
                 "user_id": userID,
                 "full_name": address?.fullName,
                 "phone": address?.phone,
-                "address":'address',
+                "address":address?.address,
                 "emirates": 'emirates'
             })
         });

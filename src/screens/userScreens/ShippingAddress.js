@@ -11,8 +11,8 @@ import {
   FlatList,
   I18nManager,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
-import {color} from '../../constants/color';
+import React, { useCallback, useEffect, useState } from 'react';
+import { color } from '../../constants/color';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 import {
@@ -22,20 +22,23 @@ import {
   userShippingAddress,
 } from '../../services/UserServices';
 import CustomLoader from '../../components/CustomLoader';
-import {useDispatch, useSelector} from 'react-redux';
-import {storeUserAddress} from '../../redux/reducer/UserShippingAddress';
+import { useDispatch, useSelector } from 'react-redux';
+import { storeUserAddress } from '../../redux/reducer/UserShippingAddress';
 import ScreenLoader from '../../components/ScreenLoader';
 import HeaderLogo from '../../components/HeaderLogo';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import CustomDropDown from '../../components/CustomDropDown';
 import ScreenView from '../../components/ScreenView';
 
-const ShippingAddress = ({navigation, route}) => {
-  const {id, btnText} = route.params ?? '';
+const ShippingAddress = ({ navigation, route }) => {
+  const { id, btnText } = route.params ?? '';
   const dispatch = useDispatch();
+  const userId = useSelector(state => state.auth.userId);
+  const reduxAddress = useSelector((item) => item?.customerAddress?.storeAddress)
 
-  const [userAddress, setUserAddress] = useState({});
+
+  const [userAddress, setUserAddress] = useState(userId?{}:reduxAddress);
   const displayNumber = userAddress?.phone?.startsWith('+965')
     ? userAddress?.phone.slice(4)
     : userAddress?.phone;
@@ -61,24 +64,28 @@ const ShippingAddress = ({navigation, route}) => {
   // );
   // const userAddress = useSelector((state) => state?.customerAddress?.storeAddress)
   // const userAddress = {}
-  const userId = useSelector(state => state.auth.userId);
-  const {t} = useTranslation();
+
+  const { t } = useTranslation();
 
   useEffect(() => {
-    handleEdit();
+
+    if(userId){
+      handleEdit();
+    }
   }, []);
 
   useEffect(() => {
     const displayNumber = userAddress?.phone?.startsWith('+965')
       ? userAddress?.phone.slice(4)
       : userAddress?.phone;
-    setFullName(userAddress?.full_name);
+    setFullName(userId ? userAddress?.full_name : userAddress?.fullName);
     setCity(userAddress?.city);
     setArea(userAddress?.area);
     setPhoneNumber(displayNumber);
     setPiece(userAddress?.street);
     setEmail(userAddress?.email);
     setCountry(userAddress?.country);
+    setVilla(userAddress?.address);
   }, [userAddress]);
 
   console.log('showiiiin', fullName);
@@ -205,6 +212,43 @@ const ShippingAddress = ({navigation, route}) => {
 
   // useEffect(() => { }, [userAddress]);
 
+  const saveAddress = () => {
+    if (userId) {
+      handlePress()
+    } else {
+      let updatedPhoneNumber =
+        phoneNumber[0] === '0' ? phoneNumber.slice(1) : phoneNumber;
+      updatedPhoneNumber = '+965' + updatedPhoneNumber;
+      const addressredux = {
+        fullName: fullName,
+        street: piece,
+        city: city,
+        piece: piece,
+        email: email,
+        area: area,
+        phone: updatedPhoneNumber,
+        country: country,
+        address: villa,
+
+      };
+      dispatch(
+        storeUserAddress({
+          ...addressredux,
+          // addressId: id ? id :null,
+        }),
+      );
+
+      Alert.alert(
+        t(''),
+        t('addressSaved'),
+        [{ text: t('ok'), onPress: () => navigation.goBack() }],
+        {
+          textAlign: I18nManager.isRTL ? 'right' : 'left', // Align title based on language direction
+        },
+      );
+    }
+  }
+
   const handlePress = async () => {
     // console.log(phoneNumber?.slice(1),'phoneNumber')
     console.log('trending');
@@ -235,14 +279,13 @@ const ShippingAddress = ({navigation, route}) => {
           area: area,
           phone: updatedPhoneNumber,
           country: country,
-          villa: villa,
+          address: villa,
         };
         console.log(addressredux, 'addressredux');
-        const response = await (userAddress
+        const response = await (userAddress  && id
           ? editShippingAddress(addressredux, userId, id)
           : addShippingAddress(addressredux, userId));
 
-        console.log('robinnnnn', response);
         if (response?.data) {
           dispatch(
             storeUserAddress({
@@ -254,7 +297,7 @@ const ShippingAddress = ({navigation, route}) => {
           Alert.alert(
             t(''),
             t('addressSaved'),
-            [{text: t('ok'), onPress: () => navigation.goBack()}],
+            [{ text: t('ok'), onPress: () => navigation.goBack() }],
             {
               textAlign: I18nManager.isRTL ? 'right' : 'left', // Align title based on language direction
             },
@@ -343,9 +386,9 @@ const ShippingAddress = ({navigation, route}) => {
 
   return (
     // <View scrollable={true} style={{paddingTop:60}}>
-    <View style={{marginHorizontal: 20, paddingTop: 40}}>
+    <View style={{ marginHorizontal: 20, paddingTop: 40 }}>
       <ScrollView
-        contentContainerStyle={{flexGrow: 1, paddingBottom: 150}}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}
         showsVerticalScrollIndicator={false}>
         <View style={styles.headerContainer}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -370,7 +413,7 @@ const ShippingAddress = ({navigation, route}) => {
             </View>
           )}
         </View>
-        <View style={{flexDirection: 'row'}}>
+        <View style={{ flexDirection: 'row' }}>
           <Text style={[styles.productName]}>{t('shipaddress')}</Text>
         </View>
         {/* 
@@ -383,9 +426,9 @@ const ShippingAddress = ({navigation, route}) => {
           autoCapitalize={false}
           keyboardType={'email'}
         /> */}
-        <View style={{marginTop: 20}}>
+        <View style={{ marginTop: 20 }}>
           <Text
-            style={{textAlign: 'left', marginBottom: 10, color: color.theme}}>
+            style={{ textAlign: 'left', marginBottom: 10, color: color.theme }}>
             {t('phoneNumber')}
           </Text>
           <View
@@ -397,7 +440,7 @@ const ShippingAddress = ({navigation, route}) => {
               borderBottomColor: '#ccc',
               // paddingBottom: 10,
             }}>
-            <Text style={{color: '#000'}}>{'\u2066+965\u2069'}</Text>
+            <Text style={{ color: '#000' }}>{'\u2066+965\u2069'}</Text>
             <TextInput
               placeholder={t('phoneNumber')}
               value={phoneNumber}
@@ -417,7 +460,7 @@ const ShippingAddress = ({navigation, route}) => {
         <CustomInput
           placeholder={t('typename')}
           title={t('fName')}
-          style={{marginTop: 20}}
+          style={{ marginTop: 20 }}
           value={fullName}
           onChangeText={setFullName}
         />
@@ -425,7 +468,7 @@ const ShippingAddress = ({navigation, route}) => {
         <CustomInput
           placeholder={t('avenue')}
           title={t('avenue')}
-          style={{marginTop: 20}}
+          style={{ marginTop: 20 }}
           value={piece}
           onChangeText={setPiece}
         />
@@ -433,7 +476,7 @@ const ShippingAddress = ({navigation, route}) => {
         <CustomInput
           placeholder={t('City')}
           title={t('City')}
-          style={{marginTop: 20}}
+          style={{ marginTop: 20 }}
           value={city}
           onChangeText={setCity}
         />
@@ -441,7 +484,7 @@ const ShippingAddress = ({navigation, route}) => {
         <CustomInput
           placeholder={t('villa')}
           title={t('villa')}
-          style={{marginTop: 20}}
+          style={{ marginTop: 20 }}
           value={villa}
           onChangeText={setVilla}
         />
@@ -494,13 +537,13 @@ const ShippingAddress = ({navigation, route}) => {
           </View>
         )}
 
-        <View style={{marginTop: 50}}>
+        <View style={{ marginTop: 50 }}>
           {isLoader ? (
             <CustomLoader />
           ) : (
             <CustomButton
               title={btnText !== undefined ? btnText : t('save')}
-              onPress={handlePress}
+              onPress={saveAddress}
               disabled={
                 btnText == 'Save' &&
                 fullName == userAddress?.full_name &&

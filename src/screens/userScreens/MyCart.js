@@ -161,7 +161,7 @@ const MyCart = ({ navigation }) => {
             flexGrow: 1,
             marginBottom: 60,
             marginTop: 10,
-            paddingBottom:100
+            paddingBottom:data?.length>=4 ? 100 :20
           }}>
           <View>
             <FlatList
@@ -176,7 +176,7 @@ const MyCart = ({ navigation }) => {
 
           {data?.length > 0 && (
             <View
-              style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 25 }}>
+              style={{ flex: 1, justifyContent: 'flex-end', }}>
               <View style={styles.noOfItemBox}>
                 <Text style={styles.selectedItemTxt}>
                   {t('total')} ({data?.length} {t('item')})

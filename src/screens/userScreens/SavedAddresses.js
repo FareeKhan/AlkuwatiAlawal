@@ -14,6 +14,7 @@ import ScreenLoader from '../../components/ScreenLoader'
 import { useFocusEffect } from '@react-navigation/native'
 import EmptyScreen from '../../components/EmptyScreen'
 import Feather from 'react-native-vector-icons/Feather'
+import CustomButton from '../../components/CustomButton'
 
 
 const SavedAddresses = ({ navigation, route }) => {
@@ -104,8 +105,8 @@ const SavedAddresses = ({ navigation, route }) => {
     }
 
     const handleEdit = async (id) => {
-        navigation.navigate('ShippingAddress',{
-            id:id
+        navigation.navigate('ShippingAddress', {
+            id: id
         })
         // try {
         //     const response = await editAddress(id)
@@ -200,7 +201,6 @@ const SavedAddresses = ({ navigation, route }) => {
                 </TouchableOpacity>
             }
 
-
             <View style={{ flex: 1, marginTop: 30 }}>
                 <FlatList
                     data={data}
@@ -213,6 +213,12 @@ const SavedAddresses = ({ navigation, route }) => {
                     renderItem={renderItem}
                 />
             </View>
+
+            <CustomButton
+                title={t('continue')}
+                style={{marginBottom:20}}
+                onPress={()=>navigation.goBack()}
+            />
         </ScreenView>
     )
 }

@@ -18,6 +18,7 @@ import { color } from '../../constants/color';
 import { paymentMethodCard } from '../../constants/data';
 import PaymentModal from '../../components/PaymentModal';
 import {
+  addShippingAddress,
   orderConfirmed,
   tokenPrice,
   userShippingAddress,
@@ -39,11 +40,14 @@ import { baseUrl } from '../../constants/data';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import CustomLoader from '../../components/CustomLoader';
+import { storeUserAddress } from '../../redux/reducer/UserShippingAddress';
 const PaymentOrder = ({ navigation, route }) => {
   //const { totalPrice } = route?.params
   const dispatch = useDispatch();
   const data = useSelector(state => state.cartProducts?.cartProducts);
   const userId = useSelector(state => state.auth?.userId);
+  const reduxAddress = useSelector((item) => item?.customerAddress?.storeAddress)
+
   const { totalPrice } = useSelector(state => state.cartProducts);
 
   const userAuth = useSelector(state => state.auth);
@@ -265,6 +269,32 @@ const PaymentOrder = ({ navigation, route }) => {
     }
   };
 
+  useEffect(() => {
+    handlePress()
+  }, [])
+
+
+  const handlePress = async () => {
+    const response = await addShippingAddress(reduxAddress, userId)
+    console.log('charsss',response)
+    try {
+      if (response?.data) {
+        dispatch(
+          storeUserAddress({
+            ...reduxAddress,
+            addressId: response.data.id,
+          }),
+        );
+
+      }
+    } catch (error) {
+      console.log('naswaar', error)
+    }
+  }
+
+
+
+
   return (
     <View style={styles.mainContainer}>
       <ScrollView
@@ -364,9 +394,9 @@ const PaymentOrder = ({ navigation, route }) => {
 
         {selectedPayment == 'cash' && (
           cashLoader ?
-          <View style={{ marginTop: 25 }}>
-            <CustomLoader />
-          </View>
+            <View style={{ marginTop: 25 }}>
+              <CustomLoader />
+            </View>
 
             :
             <CustomButton

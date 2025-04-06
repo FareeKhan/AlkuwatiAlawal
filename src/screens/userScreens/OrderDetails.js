@@ -41,28 +41,6 @@ const OrderDetails = ({ navigation, route }) => {
     const { userAddressA } = route?.params || ''
     const isFocused = useIsFocused();
 
-
-    // const totalPrice = calculateTotalPrice(data);
-    // const [totalPrice, setTotalPrice] = useState(calculateTotalPrice(data))
-    // const [value, setValue] = useState(totalPrice)
-
-
-    // useEffect(() => {
-    //     getAllCodes()
-    //     getAllCodes()
-    // }, [])
-
-
-    // const getAllCodes = async () => {
-    //     try {
-    //         const result = await promoCodes()
-
-    //     } catch (error) {
-    //         console.log('error', error)
-    //     }
-    // }
-
-
     const applyCode = async () => {
         if (!promoCode) {
             Alert.alert('', t('PleasePromo'), [
@@ -108,6 +86,7 @@ const OrderDetails = ({ navigation, route }) => {
         try {
             const response = await userShippingAddress(userId);
             console.log('sajidToro', response)
+            console.log('tangaiiii', response)
             if (response?.data?.length > 0) {
                 setAddress(response?.data)
             } else {
@@ -138,6 +117,10 @@ const OrderDetails = ({ navigation, route }) => {
 
 
     const handleOnPress = () => {
+        if( !userAddress?.phone){
+            Alert.alert('', t('addAddress'))
+            return
+        }
         if (userId) {
             navigation.navigate('PaymentOrder', {
                 totalPrice: totalPrice
@@ -148,9 +131,7 @@ const OrderDetails = ({ navigation, route }) => {
                 phoneNo: userAddress?.phone
             })
         }
-        else {
-            alert(t('selectAddress'))
-        }
+       
     }
 
 
@@ -174,26 +155,27 @@ const OrderDetails = ({ navigation, route }) => {
 
 
     const onPressEmptyAddress = () => {
-        if (userId) {
-            navigation.navigate("ShippingAddress")
-        } else {
-            Alert.alert(
-                t(''),
-                t('addressSaved'),
-                [
-                    {
-                        text: t('ok'), onPress: () => navigation.navigate('StackNavigations', {
-                            screen: "Login",
-                            params: { isOrderDetail: true }
-                        }
-                        )
-                    }
-                ],
-                {
-                    textAlign: I18nManager.isRTL ? 'right' : 'left'  // Align title based on language direction
-                }
-            );
-        }
+        navigation.navigate("ShippingAddress")
+        // if (userId) {
+        //     navigation.navigate("ShippingAddress")
+        // } else {
+        //     Alert.alert(
+        //         t(''),
+        //         t('addressSaved'),
+        //         [
+        //             {
+        //                 text: t('ok'), onPress: () => navigation.navigate('StackNavigations', {
+        //                     screen: "Login",
+        //                     params: { isOrderDetail: true }
+        //                 }
+        //                 )
+        //             }
+        //         ],
+        //         {
+        //             textAlign: I18nManager.isRTL ? 'right' : 'left'  // Align title based on language direction
+        //         }
+        //     );
+        // }
 
     }
     console.log('shumaila', address?.length)
@@ -237,9 +219,9 @@ const OrderDetails = ({ navigation, route }) => {
                                 <AddressLine label={t('phoneNumber')} value={`\u2066${userAddress?.phone}\u2069`} />
                                 <AddressLine label={t('Country')} value={userAddress?.country} />
                             </View>
-                            {/* <TouchableOpacity onPress={() => navigation.navigate(userId !== null ? 'SavedAddresses' : 'ShippingAddress')} style={styles.editBox}>
+ {                         !userId &&  <TouchableOpacity onPress={() => navigation.navigate('ShippingAddress')} style={styles.editBox}>
                                 <Text style={{ color: color.theme }}>{t("edit")}</Text>
-                            </TouchableOpacity> */}
+                            </TouchableOpacity>}
                         </View>
                 }
                 <View style={{ flexDirection: 'row' }}>
@@ -282,7 +264,7 @@ const OrderDetails = ({ navigation, route }) => {
                                 </View>
                                 :
                                 <TouchableOpacity onPress={() => applyCode()} style={{ justifyContent: "center", paddingHorizontal: 5 }}>
-                                    <CustomText style={{ color: color.theme, fontWeight: "500" }}>Apply</CustomText>
+                                    <CustomText style={{ color: color.theme, fontWeight: "500" }}>{t('apply')}</CustomText>
                                 </TouchableOpacity>
 
                     }
@@ -298,9 +280,7 @@ const OrderDetails = ({ navigation, route }) => {
 
                         {
                             <TouchableOpacity
-                                disabled={(Object.keys(userAddress).length > 0) ? false : true}
-                                style={{ ...styles.bottomPlaceOrderBox, backgroundColor: (Object.keys(userAddress)?.length > 0) ? color.theme : 'grey' }} onPress={handleOnPress}>
-                                {/* // style={{ ...styles.bottomPlaceOrderBox, backgroundColor: userAddress !== undefined ? color.theme : 'grey' }} onPress={handleOnPress}> */}
+                                style={{ ...styles.bottomPlaceOrderBox, backgroundColor:  color.theme  }} onPress={handleOnPress}>
                                 <Text style={styles.orderTxt}>{t("continue")}</Text>
                             </TouchableOpacity>
                         }
